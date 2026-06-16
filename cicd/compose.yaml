@@ -23,5 +23,23 @@ services:
     container_name: jenkins-agent-2
     restart: unless-stopped
 
+  jenkins-cli:
+    image: jenkins/jenkins:lts-jdk21
+    container_name: jenkins-cli
+    depends_on:
+      - jenkins
+    restart: "no"
+    entrypoint: >
+      bash -c "
+      curl -s -o /tmp/jenkins-cli.jar http://jenkins:8080/jnlpJars/jenkins-cli.jar &&
+      echo '<slave><name>jenkins-agent-1</name><remoteFS>/home/jenkins/agent</remoteFS><numExecutors>1</numExecutors><mode>NORMAL</mode><retentionStrategy class=\"hudson.slaves.RetentionStrategy$Always\"/><launcher class=\"hudson.slaves.JNLPLauncher\"/><label></label><nodeProperties/></slave>' |
+      java -jar /tmp/jenkins-cli.jar -s http://jenkins:8080 -auth $$JENKINS_USER:$$JENKINS_TOKEN create-node jenkins-agent-1 &&
+      echo '<slave><name>jenkins-agent-2</name><remoteFS>/home/jenkins/agent</remoteFS><numExecutors>1</numExecutors><mode>NORMAL</mode><retentionStrategy class=\"hudson.slaves.RetentionStrategy$Always\"/><launcher class=\"hudson.slaves.JNLPLauncher\"/><label></label><nodeProperties/></slave>' |
+      java -jar /tmp/jenkins-cli.jar -s http://jenkins:8080 -auth $$JENKINS_USER:$$JENKINS_TOKEN create-node jenkins-agent-2
+      "
+    environment:
+      JENKINS_USER: ${JENKINS_USER}
+      JENKINS_TOKEN: ${JENKINS_TOKEN}
+
 volumes:
   jenkins_home:
