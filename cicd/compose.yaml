@@ -48,7 +48,12 @@ services:
     environment:
       JENKINS_AGENT_SSH_PUBKEY: ${JENKINS_AGENT_SSH_PUBKEY}
 
+  registry:
+    image: registry:3
+    container_name: registry
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+
 volumes:
   jenkins_home:
-        - jenkins_home:/var/jenkins_home
-        - .:/var/jenkins_home/workspace-source:ro

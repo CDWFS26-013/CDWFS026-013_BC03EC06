@@ -27,5 +27,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Push to local registry') {
+            steps {
+                script {
+                    docker.withRegistry('http://registry:5000') {
+                        def img = docker.build('registry:5000/water-app:latest', 'cicd')
+                        img.push()
+                    }
+                }
+            }
+        }
     }
 }
