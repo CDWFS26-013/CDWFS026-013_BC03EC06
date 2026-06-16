@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Run tests') {
+            agent {
+                docker {
+                    image 'python:3.11'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh 'python3 --version'
+            }
+        }
+    }
+}
