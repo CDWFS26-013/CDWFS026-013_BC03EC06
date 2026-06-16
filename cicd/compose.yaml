@@ -13,5 +13,15 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
 
+  jenkins-agent-1:
+    image: jenkins/agent:latest
+    container_name: jenkins-agent-1
+    restart: unless-stopped
+
+  jenkins-agent-2:
+    image: jenkins/agent:latest
+    container_name: jenkins-agent-2
+    restart: unless-stopped
+
 volumes:
   jenkins_home:
