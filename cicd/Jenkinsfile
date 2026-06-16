@@ -1,41 +1,19 @@
 pipeline {
-    agent any
+    agent {
+        label 'ssh-agent'
+    }
 
     stages {
-        stage('Checkout') {
+        stage('Pull image from local registry') {
             steps {
-                checkout scm
+                sh 'docker pull registry:5000/water-app:latest'
             }
         }
 
-        stage('Run tests') {
-            agent {
-                docker {
-                    image 'python:3.11'
-                    reuseNode true
-                }
-            }
+        stage('Deploy on host') {
             steps {
-                sh 'python3 --version'
-            }
-        }
-
-        stage('Build Water image') {
-            steps {
-                script {
-                    docker.build('water-app:latest', 'cicd')
-                }
-            }
-        }
-
-        stage('Push to local registry') {
-            steps {
-                script {
-                    docker.withRegistry('http://registry:5000') {
-                        def img = docker.build('registry:5000/water-app:latest', 'cicd')
-                        img.push()
-                    }
-                }
+                sh 'docker rm -f water-app || true'
+                sh 'docker run -d --name water-app -p 5000:5000 registry:5000/water-app:latest'
             }
         }
     }
