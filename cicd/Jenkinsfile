@@ -4,13 +4,26 @@ pipeline {
     }
 
     stages {
-        stage('Pull image from local registry') {
+        stage('Tests') {
             steps {
-                sh 'docker pull registry:5000/water-app:latest'
+                sh '''
+                    docker run --rm \
+                        -v $(pwd)/cicd:/app \
+                        -w /app \
+                        python:3.11 \
+                        python -m py_compile app.py service.py
+                '''
             }
         }
 
-        stage('Deploy on host') {
+        stage('Build') {
+            steps {
+                sh 'docker build -t registry:5000/water-app:latest cicd/'
+                sh 'docker push registry:5000/water-app:latest'
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 sh 'docker rm -f water-app || true'
                 sh 'docker run -d --name water-app -p 5000:5000 registry:5000/water-app:latest'
