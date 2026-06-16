@@ -10,8 +10,18 @@ pipeline {
                     docker run --rm \
                         -v $(pwd)/cicd:/app \
                         -w /app \
-                        python:3.11 \
-                        python -m py_compile app.py service.py
+                        python:3.11-slim \
+                        sh -c "
+                            pip install flask requests -q &&
+                            python -m flask --app app run --host=0.0.0.0 > /tmp/flask.log 2>&1 &
+                            python test_api.py
+                            EXIT=$?
+                            if [ $EXIT -ne 0 ]; then
+                                echo '--- Logs Flask ---'
+                                cat /tmp/flask.log
+                            fi
+                            exit $EXIT
+                        "
                 '''
             }
         }
