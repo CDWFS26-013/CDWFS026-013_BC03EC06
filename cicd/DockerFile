@@ -1,0 +1,8 @@
+FROM jenkins/jenkins:lts-jdk21
+
+USER jenkins
+
+RUN jenkins-plugin-cli --plugins \
+    workflow-aggregator \
+    git \
+    docker-workflow
