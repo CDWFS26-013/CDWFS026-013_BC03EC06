@@ -19,5 +19,13 @@ pipeline {
                 sh 'python3 --version'
             }
         }
+
+        stage('Build Water image') {
+            steps {
+                script {
+                    docker.build('water-app:latest', 'cicd')
+                }
+            }
+        }
     }
 }
